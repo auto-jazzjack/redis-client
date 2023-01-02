@@ -1,0 +1,41 @@
+buildscript {
+    ext {
+        reactor_version = "3.4.12"
+        jackson_version = "2.11.0"
+
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+}
+
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    group = 'io.malang'
+    sourceCompatibility = '11'
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        testImplementation ("org.junit.vintage:junit-vintage-engine:5.2.0")
+        compileOnly('org.projectlombok:lombok:1.18.12')
+        annotationProcessor('org.projectlombok:lombok:1.18.12')
+
+        testCompileOnly 'org.projectlombok:lombok:1.18.12'
+        testAnnotationProcessor('org.projectlombok:lombok:1.18.12')
+    }
+
+
+}
