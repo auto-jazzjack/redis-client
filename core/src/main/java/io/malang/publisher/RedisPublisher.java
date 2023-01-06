@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -16,20 +17,28 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class RedisPublisher<K, V, O> implements Publisher<O> {
 
-    private final Supplier<RedisCommand<K, ?, ? super O>> supplier;
+    private final Supplier<RedisCommand<K, V, O>> supplier;
     private final StatefulConnection<K, O> connection;
-    RedisCommand<K, ?, ? super O> redisCommand;
+    RedisCommand<K, V, O> redisCommand;
 
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void subscribe(Subscriber<? super O> s) {
+    public void subscribe(Subscriber<? super O> actual) {
         if (redisCommand == null) {
             redisCommand = supplier.get();
         }
 
-        RedisSubscription<K, V, O> subscription = new RedisSubscription<>(s, (RedisCommand<K, V, O>) redisCommand, connection);
-        s.onSubscribe(subscription);
+        RedisSubscription<K, V, O> subscription = new RedisSubscription<>(actual, redisCommand, connection);
+        actual.onSubscribe(subscription);
+
+        this.redisCommand
+                .thenAccept(new Consumer<O>() {
+                    @Override
+                    public void accept(O o) {
+
+                    }
+                });
+
 
     }
 

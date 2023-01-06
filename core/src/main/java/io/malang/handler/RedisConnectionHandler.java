@@ -12,7 +12,7 @@ import java.util.Deque;
 public class RedisConnectionHandler extends ChannelDuplexHandler {
 
 
-    private Deque<RedisCommand<?, ?, ?>> queue;
+    private final Deque<RedisCommand<?, ?, ?>> queue;
 
     public RedisConnectionHandler() {
         queue = new ArrayDeque<>();
@@ -33,10 +33,11 @@ public class RedisConnectionHandler extends ChannelDuplexHandler {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof ByteBuf) {
             if (canDecode((ByteBuf) msg)) {
-
+                ((ByteBuf) msg).release();
             }
+        } else {
+            super.channelRead(ctx, msg);
         }
-        super.channelRead(ctx, msg);
     }
 
     boolean canDecode(ByteBuf byteBuf) {
@@ -46,7 +47,7 @@ public class RedisConnectionHandler extends ChannelDuplexHandler {
         }
 
         RedisCommand<?, ?, ?> peek = this.queue.peek();
-        boolean complete = peek.complete(byteBuf);
+        peek.completeRaw(byteBuf);
         this.queue.poll();
 
 

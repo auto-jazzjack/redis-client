@@ -9,7 +9,7 @@ import org.reactivestreams.Subscription;
 @RequiredArgsConstructor
 public class RedisSubscription<K, V, T> implements Subscription, Subscriber<T> {
 
-    private final Subscriber<? super T> subscriber;
+    private final Subscriber<? super T> down;
     private final RedisCommand<K, V, T> redisCommand;
     private final StatefulConnection<K, T> connection;
     private Subscription subscription;
@@ -18,32 +18,34 @@ public class RedisSubscription<K, V, T> implements Subscription, Subscriber<T> {
     @Override
     public void onSubscribe(Subscription s) {
         this.subscription = s;
-        this.subscriber.onSubscribe(this.subscription);
+        this.down.onSubscribe(this.subscription);
     }
 
     @Override
     public void onNext(T o) {
-        subscriber.onNext(o);
+        down.onNext(o);
     }
 
     @Override
     public void onError(Throwable t) {
-        subscriber.onError(t);
+        down.onError(t);
     }
 
     @Override
     public void onComplete() {
-        subscriber.onComplete();
+        down.onComplete();
     }
 
     @Override
     public void request(long n) {
         // this.subscription.request(n);
-        this.connection.dispatch(redisCommand);
+        this.subscription.request(n);
+        this.connection.dispatch(this.redisCommand);
     }
 
     @Override
     public void cancel() {
         this.subscription.cancel();
+        this.redisCommand.cancel(true);
     }
 }

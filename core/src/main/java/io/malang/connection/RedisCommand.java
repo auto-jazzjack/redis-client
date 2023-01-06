@@ -5,13 +5,18 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import static io.malang.util.RedisCommandUtil.appendSet;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @RequiredArgsConstructor
-public class RedisCommand<K, V, O> {
+public class RedisCommand<K, V, O> extends CompletableFuture<O> {
 
     private final K key;
     private final V value;
@@ -21,6 +26,7 @@ public class RedisCommand<K, V, O> {
     private final Codec<K, O> codec;
 
     private static final String DELIMITER = "\r\n";
+
 
     @AllArgsConstructor
     public enum Command {
@@ -39,7 +45,7 @@ public class RedisCommand<K, V, O> {
         return null;
     }
 
-    public boolean complete(ByteBuf byteBuf) {
+    public boolean completeRaw(ByteBuf byteBuf) {
 
         if (byteBuf.readableBytes() <= 0) {
             return false;
@@ -51,6 +57,7 @@ public class RedisCommand<K, V, O> {
                 break;
 
         }
+        this.complete(this.output);
         return true;
     }
 }

@@ -53,6 +53,7 @@ public class TestSample {
                 .uri(URI.create("redis://127.0.0.1"))
                 .connect();
         String hello = connect.reactor()
+
                 .set("hello", "asd")
                 .block();
 
