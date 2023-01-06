@@ -8,7 +8,7 @@ public interface Codec<K, V> {
 
     ByteBuf encodeValue(V o);
 
-    K decodeVKey(ByteBuf byteBuf);
+    K decodeKey(ByteBuf byteBuf);
 
     ByteBuf encodeKey(K o);
 }

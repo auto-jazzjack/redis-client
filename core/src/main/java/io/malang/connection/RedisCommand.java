@@ -38,4 +38,19 @@ public class RedisCommand<K, V, O> {
         }
         return null;
     }
+
+    public boolean complete(ByteBuf byteBuf) {
+
+        if (byteBuf.readableBytes() <= 0) {
+            return false;
+        }
+        byte b = byteBuf.readByte();
+        switch (b) {
+            case '+':
+                this.output = this.codec.decodeValue(byteBuf);
+                break;
+
+        }
+        return true;
+    }
 }

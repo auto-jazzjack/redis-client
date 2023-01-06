@@ -35,7 +35,7 @@ public class TestSample {
                     }
 
                     @Override
-                    public String decodeVKey(ByteBuf byteBuf) {
+                    public String decodeKey(ByteBuf byteBuf) {
                         byte[] v = new byte[byteBuf.readableBytes()];
                         for (int i = 0; i < v.length; i++) {
                             v[i] = byteBuf.readByte();
