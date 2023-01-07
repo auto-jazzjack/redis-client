@@ -18,4 +18,9 @@ public class ReactorRedisCommandImpl<K, V> implements ReactorRedisCommand<K, V> 
     public Mono<V> set(K key, V value) {
         return Mono.from(new RedisPublisher<>(() -> new RedisCommand<K, Object, V>(key, value, RedisCommand.Command.SET, codec), connection));
     }
+
+    @Override
+    public Mono<V> get(K key) {
+        return Mono.from(new RedisPublisher<>(() -> new RedisCommand<>(key, null, RedisCommand.Command.GET, codec), connection));
+    }
 }
