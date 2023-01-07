@@ -64,16 +64,19 @@ public class TestSample {
                 })
                 .uri(URI.create("redis://127.0.0.1"))
                 .connect();
-        String hello = connect.reactor()
-                .set("hello", "asd")
-                .block();
 
-        String hello1 = connect.reactor()
-                .get("hello")
-                .block();
+        for (int i = 0; i < 100; i++) {
+            String hello = connect.reactor()
+                    .set(i + "", i + "")
+                    .block();
 
-        System.out.println(hello);
-        System.out.println(hello1);
+            String hello1 = connect.reactor()
+                    .get(i + "")
+                    .block();
+
+            //System.out.println(hello);
+            System.out.println(hello1);
+        }
 
 
     }
