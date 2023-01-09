@@ -4,11 +4,11 @@ import io.netty.buffer.ByteBuf;
 
 public interface Codec<K, V> {
 
-    V decodeValue(ByteBuf byteBuf);
+    V decodeValue(ByteBuf byteBuf, int size);
 
     ByteBuf encodeValue(V o);
 
-    K decodeVKey(ByteBuf byteBuf);
+    K decodeKey(ByteBuf byteBuf);
 
     ByteBuf encodeKey(K o);
 }

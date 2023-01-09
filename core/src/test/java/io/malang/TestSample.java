@@ -19,23 +19,31 @@ public class TestSample {
         StatefulConnection<String, String> connect = ConnectionBuilder.<String, String>builder()
                 .codec(new Codec<>() {
                     @Override
-                    public String decodeValue(ByteBuf byteBuf) {
-                        byte[] v = new byte[byteBuf.readableBytes()];
-                        for (int i = 0; i < v.length; i++) {
+                    public String decodeValue(ByteBuf byteBuf, int size) {
+                        int limit = Math.min(size, byteBuf.readableBytes());
+                        byte[] v = new byte[limit];
+
+                        for (int i = 0; i < limit; i++) {
                             v[i] = byteBuf.readByte();
                         }
+
                         return new String(v);
                     }
 
                     @Override
                     public ByteBuf encodeValue(String o) {
                         ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer(o.length());
-                        buffer.writeCharSequence(o, StandardCharsets.UTF_8);
-                        return buffer;
+
+                        try {
+                            buffer.writeCharSequence(o, StandardCharsets.US_ASCII);
+                            return buffer;
+                        } finally {
+                            buffer.release();
+                        }
                     }
 
                     @Override
-                    public String decodeVKey(ByteBuf byteBuf) {
+                    public String decodeKey(ByteBuf byteBuf) {
                         byte[] v = new byte[byteBuf.readableBytes()];
                         for (int i = 0; i < v.length; i++) {
                             v[i] = byteBuf.readByte();
@@ -46,17 +54,29 @@ public class TestSample {
                     @Override
                     public ByteBuf encodeKey(String o) {
                         ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer(o.length());
-                        buffer.writeCharSequence(o, StandardCharsets.UTF_8);
-                        return buffer;
+                        try {
+                            buffer.writeCharSequence(o, StandardCharsets.UTF_8);
+                            return buffer;
+                        } finally {
+                            buffer.release();
+                        }
                     }
                 })
                 .uri(URI.create("redis://127.0.0.1"))
                 .connect();
-        String hello = connect.reactor()
-                .set("hello", "asd")
-                .block();
 
-        System.out.println(hello);
+        for (int i = 0; i < 100; i++) {
+            String hello = connect.reactor()
+                    .set(i + "", i + "")
+                    .block();
+
+            String hello1 = connect.reactor()
+                    .get(i + "")
+                    .block();
+
+            //System.out.println(hello);
+            System.out.println(hello1);
+        }
 
 
     }

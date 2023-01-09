@@ -16,20 +16,20 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class RedisPublisher<K, V, O> implements Publisher<O> {
 
-    private final Supplier<RedisCommand<K, ?, ? super O>> supplier;
+    private final Supplier<RedisCommand<K, V, O>> supplier;
     private final StatefulConnection<K, O> connection;
-    RedisCommand<K, ?, ? super O> redisCommand;
+    private RedisCommand<K, V, O> redisCommand;
 
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void subscribe(Subscriber<? super O> s) {
+    public void subscribe(Subscriber<? super O> actual) {
         if (redisCommand == null) {
             redisCommand = supplier.get();
         }
 
-        RedisSubscription<K, V, O> subscription = new RedisSubscription<>(s, (RedisCommand<K, V, O>) redisCommand, connection);
-        s.onSubscribe(subscription);
+        RedisSubscription<K, V, O> subscription = new RedisSubscription<>(actual, redisCommand, connection);
+        actual.onSubscribe(subscription);
+
 
     }
 
