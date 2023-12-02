@@ -1,6 +1,5 @@
 package io.malang.command;
 
-import io.malang.connection.RedisCommand;
 import io.malang.connection.StatefulConnection;
 import lombok.RequiredArgsConstructor;
 import org.reactivestreams.Subscriber;
@@ -10,7 +9,7 @@ import org.reactivestreams.Subscription;
 public class RedisSubscription<K, V, T> implements Subscription, Subscriber<T> {
 
     private final Subscriber<? super T> actual;
-    private final RedisCommand<K, V, T> redisCommand;
+    private final RedisCommand<K, T> redisCommand;
     private final StatefulConnection<K, T> connection;
 
 

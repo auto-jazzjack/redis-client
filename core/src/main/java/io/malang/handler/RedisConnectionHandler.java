@@ -1,6 +1,6 @@
 package io.malang.handler;
 
-import io.malang.connection.RedisCommand;
+import io.malang.command.RedisCommand;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,7 +12,7 @@ import java.util.Deque;
 public class RedisConnectionHandler extends ChannelDuplexHandler {
 
 
-    private final Deque<RedisCommand<?, ?, ?>> queue;
+    private final Deque<RedisCommand<?, ?>> queue;
 
     public RedisConnectionHandler() {
         queue = new ArrayDeque<>();
@@ -21,9 +21,9 @@ public class RedisConnectionHandler extends ChannelDuplexHandler {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg instanceof RedisCommand) {
-            RedisCommand<?, ?, ?> v = (RedisCommand<?, ?, ?>) msg;
+            RedisCommand<?, ?> v = (RedisCommand<?, ?>) msg;
             queue.add(v);
-            ctx.writeAndFlush(v.toCommand(), promise);
+            ctx.writeAndFlush(v.toRedisProtocol(), promise);
         } else {
             super.write(ctx, msg, promise);
         }
@@ -46,8 +46,8 @@ public class RedisConnectionHandler extends ChannelDuplexHandler {
             return false;
         }
 
-        RedisCommand<?, ?, ?> peek = this.queue.peek();
-        peek.completeRaw(byteBuf);
+        RedisCommand<?, ?> peek = this.queue.peek();
+        peek.complete(byteBuf);
         this.queue.poll();
 
 

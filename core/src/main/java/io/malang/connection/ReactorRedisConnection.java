@@ -1,9 +1,9 @@
-package io.malang.command;
+package io.malang.connection;
 
 import reactor.core.publisher.Mono;
 
 
-public interface ReactorRedisCommand<K, V> {
+public interface ReactorRedisConnection<K, V> {
     Mono<V> set(K key, V value);
 
     Mono<V> get(K key);

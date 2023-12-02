@@ -53,7 +53,7 @@ public class ConnectionBuilder<K, V> {
         channels = new DefaultChannelGroup(new NioEventLoopGroup().next());
         bootstrap.handler(new ChannelInitializer<>() {
             @Override
-            protected void initChannel(Channel ch) throws Exception {
+            protected void initChannel(Channel ch) {
                 handler = new RedisConnectionHandler();
                 channels.add(ch.pipeline().addLast(handler).channel());
             }
@@ -65,7 +65,7 @@ public class ConnectionBuilder<K, V> {
             }
         });
         bootstrap.connect(uri.getHost(), uri.getPort() == -1 ? 6379 : uri.getPort());
-        return new StatefulConnection<K,V>(channels, codec);
+        return new StatefulConnection<>(channels, codec);
     }
 
 
