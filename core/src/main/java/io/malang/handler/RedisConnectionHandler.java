@@ -1,6 +1,6 @@
 package io.malang.handler;
 
-import io.malang.connection.RedisCommand;
+import io.malang.command.RedisCommand;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -23,7 +23,7 @@ public class RedisConnectionHandler extends ChannelDuplexHandler {
         if (msg instanceof RedisCommand) {
             RedisCommand<?, ?, ?> v = (RedisCommand<?, ?, ?>) msg;
             queue.add(v);
-            ctx.writeAndFlush(v.toCommand(), promise);
+            ctx.writeAndFlush(v.toRedisProtocol(), promise);
         } else {
             super.write(ctx, msg, promise);
         }
@@ -47,7 +47,7 @@ public class RedisConnectionHandler extends ChannelDuplexHandler {
         }
 
         RedisCommand<?, ?, ?> peek = this.queue.peek();
-        peek.completeRaw(byteBuf);
+        peek.completeCommand(byteBuf);
         this.queue.poll();
 
 

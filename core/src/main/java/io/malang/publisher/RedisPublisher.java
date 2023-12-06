@@ -1,7 +1,7 @@
 package io.malang.publisher;
 
 import io.malang.command.RedisSubscription;
-import io.malang.connection.RedisCommand;
+import io.malang.command.RedisCommand;
 import io.malang.connection.StatefulConnection;
 import lombok.RequiredArgsConstructor;
 import org.reactivestreams.Publisher;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 public class RedisPublisher<K, V, O> implements Publisher<O> {
 
     private final Supplier<RedisCommand<K, V, O>> supplier;
-    private final StatefulConnection<K, O> connection;
+    private final StatefulConnection<K, V> connection;
     private RedisCommand<K, V, O> redisCommand;
 
 
@@ -29,8 +29,6 @@ public class RedisPublisher<K, V, O> implements Publisher<O> {
 
         RedisSubscription<K, V, O> subscription = new RedisSubscription<>(actual, redisCommand, connection);
         actual.onSubscribe(subscription);
-
-
     }
 
 }
