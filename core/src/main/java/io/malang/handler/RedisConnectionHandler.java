@@ -12,7 +12,7 @@ import java.util.Deque;
 public class RedisConnectionHandler extends ChannelDuplexHandler {
 
 
-    private final Deque<RedisCommand<?, ?>> queue;
+    private final Deque<RedisCommand<?, ?, ?>> queue;
 
     public RedisConnectionHandler() {
         queue = new ArrayDeque<>();
@@ -21,7 +21,7 @@ public class RedisConnectionHandler extends ChannelDuplexHandler {
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         if (msg instanceof RedisCommand) {
-            RedisCommand<?, ?> v = (RedisCommand<?, ?>) msg;
+            RedisCommand<?, ?, ?> v = (RedisCommand<?, ?, ?>) msg;
             queue.add(v);
             ctx.writeAndFlush(v.toRedisProtocol(), promise);
         } else {
@@ -46,8 +46,8 @@ public class RedisConnectionHandler extends ChannelDuplexHandler {
             return false;
         }
 
-        RedisCommand<?, ?> peek = this.queue.peek();
-        peek.complete(byteBuf);
+        RedisCommand<?, ?, ?> peek = this.queue.peek();
+        peek.completeCommand(byteBuf);
         this.queue.poll();
 
 

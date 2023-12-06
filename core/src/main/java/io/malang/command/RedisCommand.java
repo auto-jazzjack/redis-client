@@ -8,15 +8,11 @@ import java.util.concurrent.CompletableFuture;
 
 
 @RequiredArgsConstructor
-public abstract class RedisCommand<K, O> extends CompletableFuture<O> {
-
-    protected final Codec<K, O> codec;
-
-    protected O output;
+public abstract class RedisCommand<K, V, O> extends CompletableFuture<O> {
 
     abstract public ByteBuf toRedisProtocol();
 
     public abstract Command command();
 
-    public abstract void complete(ByteBuf byteBuf);
+    public abstract void completeCommand(ByteBuf byteBuf);
 }

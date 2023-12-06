@@ -5,16 +5,21 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import lombok.EqualsAndHashCode;
 
+import java.nio.charset.StandardCharsets;
+
 import static io.malang.util.RedisCommandUtil.*;
 
 @EqualsAndHashCode(callSuper = true)
-public class SetRedisCommand<K, V, O> extends RedisCommand<K, O> {
+public class SetRedisCommand<K, V> extends RedisCommand<K, V, String> {
 
     private final K key;
     private final V value;
+    private final Codec<K> keyCodec;
+    private final Codec<V> valueCodec;
 
-    public SetRedisCommand(K key, V value, Codec<K, O> codec) {
-        super(codec);
+    public SetRedisCommand(K key, V value, Codec<K> keyCodec, Codec<V> valueCodec) {
+        this.keyCodec = keyCodec;
+        this.valueCodec = valueCodec;
         this.key = key;
         this.value = value;
     }
@@ -38,16 +43,20 @@ public class SetRedisCommand<K, V, O> extends RedisCommand<K, O> {
         byteBuf.writeBytes(SET);
         byteBuf.writeBytes(DELIMITER);
 
-        writeIfString(byteBuf, this.key);
-        writeIfString(byteBuf, this.value);
+        //byteBuf.writeBytes(this.keyCodec.encode(key));
+        writeIfString(byteBuf, key);
+        writeIfString(byteBuf, value);
+        //byteBuf.writeBytes(this.valueCodec.encode(value));
         return byteBuf;
     }
 
     @Override
-    public void complete(ByteBuf byteBuf) {
+    public void completeCommand(ByteBuf byteBuf) {
 
         if (byteBuf.readableBytes() <= 0) {
-            return;
+            complete(null);
+        } else {
+            complete(String.valueOf(byteBuf.readCharSequence(byteBuf.readableBytes(), StandardCharsets.UTF_8)));
         }
 
     }

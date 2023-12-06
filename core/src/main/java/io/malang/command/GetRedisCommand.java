@@ -8,13 +8,14 @@ import lombok.EqualsAndHashCode;
 import static io.malang.util.RedisCommandUtil.*;
 
 @EqualsAndHashCode(callSuper = true)
-public class GetRedisCommand<K, V, O> extends RedisCommand<K, O> {
+public class GetRedisCommand<K, O> extends RedisCommand<K, O, O> {
 
     private final K key;
+    private final Codec<O>codec;
 
-    public GetRedisCommand(K key, Codec<K, O> codec) {
-        super(codec);
+    public GetRedisCommand(K key, Codec<O> codec) {
         this.key = key;
+        this.codec = codec;
     }
 
     @Override
@@ -41,26 +42,27 @@ public class GetRedisCommand<K, V, O> extends RedisCommand<K, O> {
     }
 
     @Override
-    public void complete(ByteBuf byteBuf) {
+    public void completeCommand(ByteBuf byteBuf) {
 
         if (byteBuf.readableBytes() <= 0) {
             return;
         }
 
+        O output = null;
         byte b = byteBuf.readByte();
         switch (b) {
             case '+':
-                this.output = codec.decodeValue(byteBuf, byteBuf.readableBytes());
+                output = codec.decode(byteBuf, byteBuf.readableBytes());
                 break;
 
             case '$':
                 byte b1 = byteBuf.readByte();//length
                 byteBuf.readBytes(2);//DELIMITER
-                this.output = this.codec.decodeValue(byteBuf, b1 - '0');
+                output = this.codec.decode(byteBuf, b1 - '0');
                 byteBuf.readBytes(2);//DELIMITER
                 break;
 
         }
-        this.complete(this.output);
+        this.complete(output);
     }
 }

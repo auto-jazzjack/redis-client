@@ -16,7 +16,9 @@ import java.util.Objects;
 
 public class ConnectionBuilder<K, V> {
 
-    private Codec<K, V> codec;
+    private Codec<K> keyCodec;
+
+    private Codec<V> valueCodec;
 
     private URI uri;
 
@@ -32,8 +34,13 @@ public class ConnectionBuilder<K, V> {
         return new ConnectionBuilder<>();
     }
 
-    public ConnectionBuilder<K, V> codec(Codec<K, V> codec) {
-        this.codec = codec;
+    public ConnectionBuilder<K, V> keyCodec(Codec<K> keyCodec) {
+        this.keyCodec = keyCodec;
+        return this;
+    }
+
+    public ConnectionBuilder<K, V> valueCodec(Codec<V> valueCodec) {
+        this.valueCodec = valueCodec;
         return this;
     }
 
@@ -44,7 +51,8 @@ public class ConnectionBuilder<K, V> {
 
     public StatefulConnection<K, V> connect() {
         Objects.requireNonNull(uri);
-        Objects.requireNonNull(codec);
+        Objects.requireNonNull(keyCodec);
+        Objects.requireNonNull(valueCodec);
 
         Bootstrap bootstrap = new Bootstrap();
 
@@ -65,7 +73,7 @@ public class ConnectionBuilder<K, V> {
             }
         });
         bootstrap.connect(uri.getHost(), uri.getPort() == -1 ? 6379 : uri.getPort());
-        return new StatefulConnection<>(channels, codec);
+        return new StatefulConnection<>(channels, keyCodec, valueCodec);
     }
 
 

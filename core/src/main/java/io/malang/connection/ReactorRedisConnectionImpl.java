@@ -12,16 +12,17 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class ReactorRedisConnectionImpl<K, V> implements ReactorRedisConnection<K, V> {
 
-    private final Codec<K, V> codec;
+    private final Codec<K> keyCodec;
+    private final Codec<V> valueCodec;
     private final StatefulConnection<K, V> connection;
 
     @Override
-    public Mono<V> set(K key, V value) {
-        return Mono.from(new RedisPublisher<>(() -> new SetRedisCommand<>(key, value, codec), connection));
+    public Mono<String> set(K key, V value) {
+        return Mono.from(new RedisPublisher<>(() -> new SetRedisCommand<>(key, value, keyCodec, valueCodec), connection));
     }
 
     @Override
     public Mono<V> get(K key) {
-        return Mono.from(new RedisPublisher<>(() -> new GetRedisCommand<>(key, codec), connection));
+        return Mono.from(new RedisPublisher<>(() -> new GetRedisCommand<>(key, valueCodec), connection));
     }
 }

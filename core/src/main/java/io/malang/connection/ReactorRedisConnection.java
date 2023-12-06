@@ -4,7 +4,7 @@ import reactor.core.publisher.Mono;
 
 
 public interface ReactorRedisConnection<K, V> {
-    Mono<V> set(K key, V value);
+    Mono<String> set(K key, V value);
 
     Mono<V> get(K key);
 }

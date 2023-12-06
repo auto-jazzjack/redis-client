@@ -9,8 +9,8 @@ import org.reactivestreams.Subscription;
 public class RedisSubscription<K, V, T> implements Subscription, Subscriber<T> {
 
     private final Subscriber<? super T> actual;
-    private final RedisCommand<K, T> redisCommand;
-    private final StatefulConnection<K, T> connection;
+    private final RedisCommand<K, V, T> redisCommand;
+    private final StatefulConnection<K, V> connection;
 
 
     @Override
@@ -35,6 +35,7 @@ public class RedisSubscription<K, V, T> implements Subscription, Subscriber<T> {
 
     @Override
     public void request(long n) {
+        //this.connection.getChannel().writeAndFlush(this.redisCommand);
         this.connection.dispatch(this.redisCommand);
         this.redisCommand
                 .thenAccept(t -> {

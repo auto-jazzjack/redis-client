@@ -4,33 +4,40 @@ import io.malang.codec.Codec;
 import io.malang.command.ClusterInfoRedisCommand;
 import io.malang.command.RedisCommand;
 import io.netty.channel.group.ChannelGroup;
+import lombok.Getter;
+
+import java.util.Map;
 
 
 public class StatefulConnection<K, V> {
 
+    @Getter
     private final ChannelGroup channel;
-    private final Codec<K, V> codec;
+    private final Codec<K> keyCodec;
+    private final Codec<V> valueCodec;
 
     private static final int SLOT_SIZE = 16384;
 
-    public StatefulConnection(ChannelGroup channel, Codec<K, V> codec) {
+    public StatefulConnection(ChannelGroup channel, Codec<K> keyCodec, Codec<V> valueCodec) {
         this.channel = channel;
-        this.codec = codec;
-        init(this.channel);
+        this.keyCodec = keyCodec;
+        this.valueCodec = valueCodec;
+        //init(this.channel);
         //send cluster info to all channel
     }
 
     private void init(ChannelGroup channelSet) {
 
-        ClusterInfoRedisCommand<K, V> clusterInfo = new ClusterInfoRedisCommand<>(this.codec);
+        ClusterInfoRedisCommand clusterInfo = new ClusterInfoRedisCommand();
         channelSet.writeAndFlush(clusterInfo);
         try{
-            V v = clusterInfo.get();
+            Map<String, String> v = clusterInfo.get();
             System.out.println(v);
         }catch (Exception e){
             System.out.println(e);
         }
 
+        System.out.println();
 
 
         /*channelSet.forEach(i -> {
@@ -55,12 +62,12 @@ public class StatefulConnection<K, V> {
     /**
      * This is method writing data to channel
      */
-    public void dispatch(RedisCommand<K, V> redisCommand) {
+    public void dispatch(RedisCommand<K, V, ?> redisCommand) {
         channel.writeAndFlush(redisCommand);
     }
 
     public ReactorRedisConnection<K, V> reactor() {
-        return new ReactorRedisConnectionImpl<>(codec, this);
+        return new ReactorRedisConnectionImpl<>(keyCodec, valueCodec, this);
     }
 
 
